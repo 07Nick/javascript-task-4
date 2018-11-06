@@ -49,18 +49,29 @@ function getEmitter() {
         off: function (event, context) {
             Array.from(commands.keys()).forEach(key => {
                 if (key === event || key.startsWith(event + '.')) {
-                    commands.get(event).delete(context);
+                    commands.get(key).delete(context);
                 }
             });
 
             return this;
         },
 
+
+        createEvent: function (event) {
+            while (event !== '') {
+                event = event.slice(0, event.lastIndexOf('.'));
+                if (commands.has(event)) {
+                    this.getEvent(event);
+                }
+            }
+        },
+
         getEvent: function (event) {
             commands.get(event).forEach((actions, student) => {
                 actions.forEach(act => {
-                    if (act.count < act.times && (act.count % act.frequency) === 0) {
+                    if (act.count < act.times && act.count % act.frequency === 0) {
                         act.handler.call(student);
+                        act.count ++;
                     }
                 });
             });
@@ -72,13 +83,7 @@ function getEmitter() {
          */
 
         emit: function (event) {
-            let second = event.split('.')[0];
-            if (commands.has(event)) {
-                this.getEvent(event);
-            }
-            if (commands.has(second) && second !== event) {
-                this.getEvent(second);
-            }
+            this.createEvent(event + '.');
 
             return this;
         },
