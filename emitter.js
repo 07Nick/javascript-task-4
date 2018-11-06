@@ -59,10 +59,10 @@ function getEmitter() {
 
         createEvent: function (event) {
             while (event !== '') {
-                event = event.slice(0, event.lastIndexOf('.'));
                 if (commands.has(event)) {
                     this.getEvent(event);
                 }
+                event = event.substring(0, event.lastIndexOf('.'));
             }
         },
 
@@ -83,7 +83,7 @@ function getEmitter() {
          */
 
         emit: function (event) {
-            this.createEvent(event + '.');
+            this.createEvent(event);
 
             return this;
         },
