@@ -15,6 +15,17 @@ function getEmitter() {
 
     return {
 
+        addCommand: function (event, context, act) {
+            if (!commands.has(event)) {
+                commands.set(event, new Map());
+            }
+            if (!commands.get(event).has(context)) {
+                commands.get(event).set(context, []);
+            }
+            commands.get(event).get(context)
+                .push(act);
+        },
+
         /**
          * Подписаться на событие
          * @param {String} event
@@ -23,10 +34,8 @@ function getEmitter() {
          */
 
         on: function (event, context, handler) {
-            if (!commands.has(event)) {
-                commands.set(event, new Map());
-            }
-            commands.get(event).set(context, handler);
+            this.addCommand(event, context, { handler, times: Infinity, frequency: 1,
+                count: 0 });
 
             return this;
         },
@@ -44,8 +53,12 @@ function getEmitter() {
         },
 
         getEvent: function (event) {
-            commands.get(event).forEach((student, handler) => {
-                student.call(handler);
+            commands.get(event).forEach((actions, student) => {
+                actions.forEach(act => {
+                    if (act.count < act.times && (act.count % act.frequency) === 0) {
+                        act.handler.call(student);
+                    }
+                });
             });
         },
 
@@ -75,7 +88,12 @@ function getEmitter() {
          * @param {Number} times – сколько раз получить уведомление
          */
         several: function (event, context, handler, times) {
-            console.info(event, context, handler, times);
+            console.info(event);
+            if (times <= 0) {
+                times = Infinity;
+            }
+            this.addCommand(event, context, { handler, times, frequency: 1, count: 0 });
+            console.info(commands);
         },
 
         /**
@@ -87,7 +105,11 @@ function getEmitter() {
          * @param {Number} frequency – как часто уведомлять
          */
         through: function (event, context, handler, frequency) {
-            console.info(event, context, handler, frequency);
+            if (frequency <= 0) {
+                frequency = 1;
+            }
+            this.addCommand(event, context, { handler, times: Infinity, frequency,
+                count: 0 });
         }
     };
 }
