@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы several и through
  */
-const isStar = false;
+const isStar = true;
 
 /**
  * Возвращает новый emitter
@@ -71,8 +71,8 @@ function getEmitter() {
                 actions.forEach(act => {
                     if (act.count < act.times && act.count % act.frequency === 0) {
                         act.handler.call(student);
-                        act.count ++;
                     }
+                    act.count ++;
                 });
             });
         },
@@ -96,13 +96,14 @@ function getEmitter() {
          * @param {Function} handler
          * @param {Number} times – сколько раз получить уведомление
          */
+
         several: function (event, context, handler, times) {
-            console.info(event);
             if (times <= 0) {
                 times = Infinity;
             }
             this.addCommand(event, context, { handler, times, frequency: 1, count: 0 });
-            console.info(commands);
+
+            return this;
         },
 
         /**
@@ -113,12 +114,15 @@ function getEmitter() {
          * @param {Function} handler
          * @param {Number} frequency – как часто уведомлять
          */
+
         through: function (event, context, handler, frequency) {
             if (frequency <= 0) {
                 frequency = 1;
             }
             this.addCommand(event, context, { handler, times: Infinity, frequency,
                 count: 0 });
+
+            return this;
         }
     };
 }
