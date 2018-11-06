@@ -15,7 +15,7 @@ function getEmitter() {
 
     return {
 
-        addCommand: function (event, context, act) {
+        addCommand: function (event, context, handlerData) {
             if (!commands.has(event)) {
                 commands.set(event, new Map());
             }
@@ -23,7 +23,7 @@ function getEmitter() {
                 commands.get(event).set(context, []);
             }
             commands.get(event).get(context)
-                .push(act);
+                .push(handlerData);
         },
 
         /**
@@ -56,23 +56,14 @@ function getEmitter() {
             return this;
         },
 
-
-        createEvent: function (event) {
-            while (event !== '') {
-                if (commands.has(event)) {
-                    this.getEvent(event);
-                }
-                event = event.substring(0, event.lastIndexOf('.'));
-            }
-        },
-
         getEvent: function (event) {
             commands.get(event).forEach((actions, student) => {
-                actions.forEach(act => {
-                    if (act.count < act.times && act.count % act.frequency === 0) {
-                        act.handler.call(student);
+                actions.forEach(handlerData => {
+                    if (handlerData.count < handlerData.times &&
+                        handlerData.count % handlerData.frequency === 0) {
+                        handlerData.handler.call(student);
                     }
-                    act.count ++;
+                    handlerData.count ++;
                 });
             });
         },
@@ -83,7 +74,12 @@ function getEmitter() {
          */
 
         emit: function (event) {
-            this.createEvent(event);
+            while (event !== '') {
+                if (commands.has(event)) {
+                    this.getEvent(event);
+                }
+                event = event.substring(0, event.lastIndexOf('.'));
+            }
 
             return this;
         },
