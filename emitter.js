@@ -22,7 +22,9 @@ function getEmitter() {
             if (!commands.get(event).has(context)) {
                 commands.get(event).set(context, []);
             }
-            commands.get(event).get(context)
+            commands
+                .get(event)
+                .get(context)
                 .push(handlerData);
         },
 
@@ -34,8 +36,10 @@ function getEmitter() {
          */
 
         on: function (event, context, handler) {
-            this.addCommand(event, context, { handler, times: Infinity, frequency: 1,
-                count: 0 });
+            this.addCommand(
+                event,
+                context,
+                { handler, times: Infinity, frequency: 1, count: 0 });
 
             return this;
         },
@@ -59,9 +63,9 @@ function getEmitter() {
         getEvent: function (event) {
             commands.get(event).forEach((actions, student) => {
                 actions.forEach(handlerData => {
-                    if (handlerData.count < handlerData.times &&
-                        handlerData.count % handlerData.frequency === 0) {
-                        handlerData.handler.call(student);
+                    const { handler, times, frequency, count } = handlerData;
+                    if (count < times && count % frequency === 0) {
+                        handler.call(student);
                     }
                     handlerData.count ++;
                 });
@@ -115,8 +119,10 @@ function getEmitter() {
             if (frequency <= 0) {
                 frequency = 1;
             }
-            this.addCommand(event, context, { handler, times: Infinity, frequency,
-                count: 0 });
+            this.addCommand(
+                event,
+                context,
+                { handler, times: Infinity, frequency, count: 0 });
 
             return this;
         }
